@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<head>
+    <title>Chatsite 101</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+        <h1 class="header">Time to start chatting!</h1>
+        <div id="chatdiv">
+            <ol>
+                <li>User1: message</li>
+                <li>User2: message</li>
+            </ol>
+        </div>
+        <br>
+        <div class="normaltext">
+            <p class="normaltext">Enter message here:</p><br>
+            <textarea id="chatsend" cols="30" rows="4"></textarea><br><br>
+            <button class="submitbutton" onclick=send() class="submitbutton"> Submit </button><br>
+             <a class="normaltext" href="./"> Log in again </a>
+        </div>
+        <script src="./static/chat.js"></script>
+</body>
+</html>

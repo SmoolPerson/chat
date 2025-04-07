@@ -1,0 +1,52 @@
+body, html {
+    background-color: lightblue; 
+}
+.header {
+    font-family: 'Gill Sans', sans-serif;
+    text-align: center;
+}
+.normaltext {
+    font-family:'Verdana', Times, serif;
+    text-align: center;
+}
+
+#logindiv {
+    font-family:'Verdana', Times, serif;
+    text-align: center;
+    background-color: aquamarine;
+    border-style: solid;
+    width: 450px;
+    height: 275px;
+    margin: auto;
+}
+
+#chatdiv {
+    font-family:'Verdana', Times, serif;
+    background-color: peachpuff;
+    padding: 10px;
+    margin: auto;
+    height: 15vw;
+    width: 60vw;
+    border-radius: 10px;
+    border-style: solid;
+}
+
+.forminput {
+    font-family:'Verdana', Times, serif;
+    font-size: 18px; 
+}
+#chatsend {
+    font-family:'Verdana', Times, serif;
+    border-style: solid;
+    border-width: 3px;
+    border-color: #287067;
+}
+
+.submitbutton {
+    background-color: peachpuff;
+    border-color: blueviolet;
+    width: 120px;
+    height: 50px;
+    font-size: 16px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+}

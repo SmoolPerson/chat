@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<head>
+    <title>Chatsite 101</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1 class="header">Welcome to the Chatroom</h1>
+    <h3 class="normaltext">Get started by logging in!</h3>
+    <h4 class="normaltext">{{ auth }}</h4>
+    <br><br><br>
+    <div id="logindiv">
+    <form class="forminput" action="./login" method="POST">
+        <br>
+        <label for="username">Username</label><br>
+        <input name="username" class="forminput" type="text" value=""><br><br>
+        <label for="password">Password</label><br>
+        <input name="password" class="forminput" type="password" value=""><br><br>
+        <input class="submitbutton" type="submit" value="Submit"><br>
+        <a class="forminput" href="./signup.html"> Sign up here! </a>        
+      </form>
+    </div>
+</body>
+</html>
