@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, make_response
 import sqlite3
 import secrets
-import asyncio
 
 connection = sqlite3.connect('maindb.db')
 cursor = connection.cursor()
