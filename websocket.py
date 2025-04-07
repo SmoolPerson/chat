@@ -1,4 +1,4 @@
-from websockets.asyncio.server import serve
+import websockets
 import asyncio
 import json
 import sqlite3
@@ -13,7 +13,7 @@ async def handler(websocket):
 
 
 async def main():
-    server = await serve(handler, "localhost", 5001)
+    server = await websockets.serve(handler, "localhost", 5001)
     print("WebSocket server started on ws://localhost:5001")
     await server.wait_closed()
 
