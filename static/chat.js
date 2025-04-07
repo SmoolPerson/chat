@@ -3,7 +3,7 @@ socket.onmessage = function(event) {
     console.log('Received message from server: ' + event.data);
 };
 function send(){
-    authToken = document.cookie.split(';')[1].split('=')[1]
+    authToken = document.cookie.split('=')[1]
     jsonMessage = {"authToken": authToken, "message": document.getElementById("chatsend").value}
     socket.send(JSON.stringify(jsonMessage));
 }

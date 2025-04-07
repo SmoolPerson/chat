@@ -10,6 +10,7 @@ async def handler(websocket):
         cursor = conn.cursor()
         message = await websocket.recv()
         dictionary = json.loads(message)
+        print(dictionary)
 
 
 async def main():
