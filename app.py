@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, make_response, redirect
 import sqlite3
 import secrets
 
@@ -32,6 +32,17 @@ def generate_cookie(username):
     conn.close()
     return response
 
+def authorize(authToken):
+    if authToken == None:
+        return None
+    conn = sqlite3.connect('maindb.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM authTokenList WHERE authToken = ?", (authToken,))
+    fetched = cursor.fetchall()
+    if fetched == []:
+        return None
+    return fetched[0][1]
+
 def debug_database():
     conn = sqlite3.connect('maindb.db')
     cursor = conn.cursor()
@@ -48,8 +59,12 @@ def debug_database():
 
 @app.route("/")
 def index():
-    return render_template('login.html', auth='')
-
+    username = authorize(request.cookies.get("authCookie"))
+    if username == None:
+        return render_template('login.html', auth='')
+    else:
+        return render_template('chat.html')
+    
 @app.route("/login", methods=["POST"])
 def login():
     conn = sqlite3.connect('maindb.db')
@@ -66,7 +81,7 @@ def login():
 
     if fetched != []:
         response = generate_cookie(username)
-        debug_database()
+        #debug_database()
         return response
     else:
         return render_template('login.html', auth='Login Failed')
@@ -96,7 +111,7 @@ def signup():
         conn.close()
 
         response = generate_cookie(username)
-        debug_database()
+        #debug_database()
 
         return response
 
