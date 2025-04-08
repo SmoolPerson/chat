@@ -1,4 +1,4 @@
-socket = new WebSocket("ws://192.168.1.242:5001");
+socket = new WebSocket("ws://localhost:5001");
 
 
 socket.addEventListener('open', function(event) {
@@ -6,6 +6,7 @@ socket.addEventListener('open', function(event) {
 });
 
 socket.onmessage = function(event) {
+    console.log(event.data)
     const para = document.createElement("p");
     let node;
     if (event.data.substring(0, 5) == "init ") {
@@ -20,18 +21,24 @@ socket.onmessage = function(event) {
         }
         return;
     }
+    else if (event.data.substring(0, 5) == "peopl") {
+        console.log("ejei")
+        value = event.data.substring(12);
+        const para = document.getElementById("onlinepeople")
+        para.innerHTML = "People online: " + value
+    }
     else if (event.data != 'invalidCookieError') {
     let message = JSON.parse(event.data);
         node = document.createTextNode(message["username"] + ": " + message["message"]);
     }
     else {
-        node = document.createTextNode("An error occurred with authentication. Please try logging in again.");
+        node = document.createTextNode("An error occurred with authentication. Please try logging in again or clearing your cookies.");
     }
     para.appendChild(node);
     const element = document.getElementById("chatdiv");
     element.appendChild(para);
     element.children[0].remove();
-};
+}; 
 
 function send(){
     let authToken = document.cookie.split('=')[1]

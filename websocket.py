@@ -1,4 +1,4 @@
-import websockets
+from websockets import serve, ConnectionClosedOK, ConnectionClosedError, broadcast
 import asyncio
 import json
 import sqlite3
@@ -42,36 +42,41 @@ async def load_msg(websocket):
     cursor.execute("SELECT * FROM messageList ORDER BY timestamp ASC")
     fetchedmessages = "init " + convert_to_json(cursor.fetchall())
     await websocket.send(fetchedmessages)
-
+    broadcast(clientSet, "peopleonline " + str(len(clientSet)))
     conn.commit()
     conn.close()
 
 async def handler(websocket):
-    while True:
-        conn = sqlite3.connect('maindb.db')
-        cursor = conn.cursor()
-        clientSet.add(websocket)
-        receivedmessage = await websocket.recv()
-        if receivedmessage == "loadmsg":
-            print("client requesting for initial message load")
-            await load_msg(websocket)
-        else:            
-            dictionary = json.loads(receivedmessage)
-            message = dictionary.get("message")
-            authToken = dictionary.get("authToken")
+    try:
+        while True:
+            conn = sqlite3.connect('maindb.db')
+            cursor = conn.cursor()
+            clientSet.add(websocket)
+            broadcast(clientSet, "peopleonline " + str(len(clientSet)))
+            receivedmessage = await websocket.recv()
+            if receivedmessage == "loadmsg":
+                print("client requesting for initial message load")
+                await load_msg(websocket)
+            else:            
+                dictionary = json.loads(receivedmessage)
+                message = dictionary.get("message")
+                authToken = dictionary.get("authToken")
 
-            username = authorize(authToken)
+                username = authorize(authToken)
 
-            if (username == [] or username == None):
-                await websocket.send("invalidCookieError")
-            else:
-                update_message_db(username, message)
-                broadcastobj = {"username": username, "message": message}
-                websockets.broadcast(clientSet, json.dumps(broadcastobj))
+                if (username == [] or username == None):
+                    await websocket.send("invalidCookieError")
+                else:
+                    update_message_db(username, message)
+                    broadcastobj = {"username": username, "message": message}
+                    broadcast(clientSet, json.dumps(broadcastobj))
+    except ConnectionClosedOK or ConnectionClosedError:
+        clientSet.remove(websocket)
+        broadcast(clientSet, "peopleonline " + str(len(clientSet)))
 
 
 async def main():
-    server = await websockets.serve(handler, "", 5001)
+    server = await serve(handler, "localhost", 5001)
     print("WebSocket server started on ws://192.168.1.242:5001")
     await server.wait_closed()
 

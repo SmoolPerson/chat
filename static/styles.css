@@ -29,7 +29,8 @@ body, html {
     width: 60vw;
     border-radius: 10px;
     border-style: solid;
-    overflow: scroll;
+    overflow-y: scroll;
+    scroll-margin-top: 200px;
 }
 
 .forminput {
