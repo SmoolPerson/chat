@@ -9,11 +9,42 @@ def update_message_db(username, message):
     conn = sqlite3.connect('maindb.db')
     cursor = conn.cursor()
     cursor.execute("INSERT INTO messageList (timestamp, username, message) VALUES (?, ?, ?)", (time.time(), username, message))
-    cursor.execute("SELECT * FROM messageList ORDER BY time ASC")
+    cursor.execute("SELECT * FROM messageList ORDER BY timestamp ASC")
     allitems = cursor.fetchall()
     if len(allitems) > 50:
-        valuetoremove = allitems[0][1]
-        cursor.execute("DELETE FROM messageList WHERE username = ?", (valuetoremove,))
+        valuetoremove = allitems[0][0]
+        cursor.execute("DELETE FROM messageList WHERE timestamp = ?", (valuetoremove,))
+    conn.commit()
+    conn.close()
+
+def authorize(authToken):
+    if authToken == None:
+        return None
+    conn = sqlite3.connect('maindb.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM authTokenList WHERE authToken = ?", (authToken,))
+    fetched = cursor.fetchall()
+    if fetched == []:
+        return None
+    return fetched[0][1]
+
+def convert_to_json(list_of_tuples):
+    output_list = []
+    for item in list_of_tuples:
+        output_list.append({"username": item[1], "message":  item[2]})
+    output_string = json.dumps(output_list)
+    return output_string
+
+async def load_msg(websocket):
+    conn = sqlite3.connect('maindb.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM messageList ORDER BY timestamp ASC")
+    fetchedmessages = "init " + convert_to_json(cursor.fetchall())
+    await websocket.send(fetchedmessages)
+
+    conn.commit()
+    conn.close()
 
 async def handler(websocket):
     while True:
@@ -23,46 +54,25 @@ async def handler(websocket):
         receivedmessage = await websocket.recv()
         if receivedmessage == "loadmsg":
             print("client requesting for initial message load")
-            cursor.execute("SELECT * FROM messageList ORDER BY timestamp ASC")
-            fetchedmessages = cursor.fetchall()
-            sendobj = [dict(item[1], item[2]) for item in fetchedmessages]
-            print(json.dumps(sendobj))
+            await load_msg(websocket)
         else:            
             dictionary = json.loads(receivedmessage)
             message = dictionary.get("message")
             authToken = dictionary.get("authToken")
 
-            cursor.execute("SELECT * FROM authTokenList WHERE authToken = ?", (authToken,))
-            fetched = cursor.fetchall()
-            conn.commit()
-            conn.close()
+            username = authorize(authToken)
 
-            if (fetched == [] or authToken == None):
-                await websocket.send("Invalid cookie. Try logging in again")
+            if (username == [] or username == None):
+                await websocket.send("invalidCookieError")
             else:
-                conn = sqlite3.connect('maindb.db')
-                cursor = conn.cursor()
-                username = fetched[0][1]
-
-                cursor.execute("INSERT INTO messageList (timestamp, username, message) VALUES (?, ?, ?)", (time.time(), username, message))
-                cursor.execute("SELECT * FROM messageList ORDER BY timestamp ASC")
-                allitems = cursor.fetchall()
-
-                if len(allitems) > 50:
-                    valuetoremove = allitems[0][0]
-                    cursor.execute("DELETE FROM messageList WHERE timestamp = ?", (valuetoremove,))
-
+                update_message_db(username, message)
                 broadcastobj = {"username": username, "message": message}
                 websockets.broadcast(clientSet, json.dumps(broadcastobj))
-                cursor.execute("SELECT * FROM messageList")
-
-                conn.commit()
-                conn.close()
 
 
 async def main():
-    server = await websockets.serve(handler, "localhost", 5001)
-    print("WebSocket server started on ws://localhost:5001")
+    server = await websockets.serve(handler, "", 5001)
+    print("WebSocket server started on ws://192.168.1.242:5001")
     await server.wait_closed()
 
 if __name__ == '__main__':

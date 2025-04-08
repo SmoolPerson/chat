@@ -40,7 +40,9 @@ def debug_database():
     cursor.execute("SELECT * FROM loginInfo")
     print("loginInfoDatabase: ", cursor.fetchall())
     cursor.execute("SELECT * FROM messageList")
-    print("messageListDatabase: ", cursor.fetchall())
+    db = cursor.fetchall()
+    print("messageListDatabase: ", db)
+    print("Length of messageList: ", len(db))
     conn.commit()
     conn.close()
 
@@ -58,14 +60,16 @@ def login():
 
     cursor.execute("SELECT * FROM loginInfo WHERE username = ? AND password = ?", (username, password))
     fetched = cursor.fetchall()
+
     conn.commit()
     conn.close()
+
     if fetched != []:
         response = generate_cookie(username)
         debug_database()
         return response
     else:
-        return render_template('index.html', auth='Login Failed')
+        return render_template('login.html', auth='Login Failed')
 
 @app.route("/signup.html")
 def signup_page():
