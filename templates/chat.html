@@ -5,15 +5,21 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+        <div id="dmdiv">
+            <p class="normaltext">Direct Messages</p>
+            <button class="dmbutton">DoubleDigitsDude</button>
+            <button class="dmbutton">Lebanon</button>
+            <button class="dmbutton">kingofMeMes</button>
+            <button class="dmbutton">barry</button>
+        </div>
         <h1 class="header">Time to start chatting!</h1>
         <p class="normaltext"><strong id="onlinepeople"></strong></p>
         <div id="chatdiv">
         </div>
-        <br>
         <div class="normaltext">
-            <p class="normaltext">Enter message here:</p><br>
-	    <textarea id="chatsend" cols="30" rows="4"></textarea><br>
-            <button class="submitbutton" onclick="send()" class="submitbutton"> Submit </button><br>
+            <p class="normaltext">Enter message here:</p>
+	    <textarea id="chatsend" cols="30" rows="1"></textarea><br><br>
+            <button class="submitbutton" onclick="send()" class="submitbutton"> Send </button><br>
              <a class="normaltext" href="./" onclick="backToLogin(event)"> Log in again </a>
         </div>
         <script src="./static/chat.js"></script>
