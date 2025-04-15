@@ -1,11 +1,12 @@
 socket = new WebSocket("ws://localhost:5001");
-
+let recipient = "everyone";
 socket.addEventListener('open', function(event) {
     // this is a special message handled by the server to load initial messages
-    socket.send("loadmsg");
+    let authToken = document.cookie.split('=')[1]
+    socket.send("loadmsg" + JSON.stringify({authToken: authToken, recipient: "everyone"}));
 });
 
-// just add notes to the chatdiv
+// just add nodes to the chatdiv
 function update_message_list(message) {
     const para = document.createElement("p")
     const node = document.createTextNode(message)
@@ -48,7 +49,7 @@ socket.onmessage = function(event) {
 // send an individual message to the server
 function send(){
     let authToken = document.cookie.split('=')[1]
-    let jsonMessage = {"authToken": authToken, "message": document.getElementById("chatsend").value}
+    let jsonMessage = {"authToken": authToken, "message": document.getElementById("chatsend").value, "recipient": recipient}
     socket.send(JSON.stringify(jsonMessage));
     document.getElementById("chatsend").value = ""
 }
@@ -68,3 +69,13 @@ document.addEventListener("keypress", function onEvent(event) {
     document.getElementById("chatsend").value = ""
     }
 });
+
+function load(person) {
+    recipient = person;
+    let authToken = document.cookie.split('=')[1]
+    socket.send("loadmsg" + JSON.stringify({authToken: authToken, recipient: recipient}));
+    const element = document.getElementById("chatdiv");
+    for (i = 0; i < element.children; i++) {
+        element.removeChild(element.children[i])
+    }
+}

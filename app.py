@@ -8,7 +8,7 @@ cursor = connection.cursor()
 # create the main tables for the program
 cursor.execute("CREATE TABLE IF NOT EXISTS loginInfo ( username varchar(255), password varchar(255) )")
 cursor.execute("CREATE TABLE IF NOT EXISTS authTokenList ( authToken varchar(255), username varchar(255) )")
-cursor.execute("CREATE TABLE IF NOT EXISTS messageList ( timestamp FLOAT, username varchar(255), message varchar(255) )")
+cursor.execute("CREATE TABLE IF NOT EXISTS messageList ( timestamp FLOAT, username varchar(255), recipient varchar(255), message varchar(255) )")
 cursor.execute("DELETE FROM authTokenList")
 connection.commit()
 connection.close()
@@ -102,7 +102,7 @@ def login():
     # if fetch does not equal [] then that means a record exists in the list
     if fetched != []:
         response = generate_cookie(username)
-        #debug_database()
+        debug_database()
         return response
     else:
         return render_template('login.html', auth='Login Failed')
@@ -135,7 +135,7 @@ def signup():
         conn.close()
 
         response = generate_cookie(username)
-        #debug_database()
+        debug_database()
 
         return response
 
