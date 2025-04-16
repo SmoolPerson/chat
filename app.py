@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, make_response, redirect
 import sqlite3
 import secrets
-import hashlib
+from argon2 import PasswordHasher
 
 connection = sqlite3.connect('maindb.db')
 cursor = connection.cursor()
@@ -16,11 +16,18 @@ connection.close()
 app = Flask(__name__)
 
 # generate sha256 hash with hashlib
-def generate_sha256_hash(input_string):
-    encoded_string = input_string.encode('utf-8')
-    sha256_hash = hashlib.sha256(encoded_string)
-    hex_digest = sha256_hash.hexdigest()
-    return hex_digest
+def generate_argon_hash(input_string):
+    ph = PasswordHasher()
+    hash = ph.hash(input_string)
+    return hash
+
+def verify_hash(input_hash, pw):
+    ph = PasswordHasher()
+    try:
+        ph.verify(input_hash, pw)
+        return True
+    except:
+        return False
 
 # generates a request with a authentication cookie for the user
 def generate_cookie(username):
@@ -92,20 +99,19 @@ def login():
 
     username = request.form['username']
     password = request.form['password']
-    # hash pw before comparing
-    hashedpw = generate_sha256_hash(password)
-    cursor.execute("SELECT * FROM loginInfo WHERE username = ? AND password = ?", (username, hashedpw))
+    cursor.execute("SELECT password FROM loginInfo WHERE username = ?", (username,))
     fetched = cursor.fetchall()
 
     conn.commit()
     conn.close()
     # if fetch does not equal [] then that means a record exists in the list
     if fetched != []:
-        response = generate_cookie(username)
-        debug_database()
-        return response
-    else:
-        return render_template('login.html', auth='Login Failed')
+        # verify PW hash
+        if verify_hash(fetched[0][0], password):
+            response = generate_cookie(username)
+            debug_database()
+            return response
+    return render_template('login.html', auth='Login Failed')
 
 # render signup page
 @app.route("/signup.html")
@@ -120,7 +126,7 @@ def signup():
 
     username = request.form['username']
     password = request.form['password']
-    hashedpw = generate_sha256_hash(password) # hash password
+    hashedpw = generate_argon_hash(password) # hash password
     cursor.execute("SELECT * FROM loginInfo WHERE username = ?", (username,))
     if (cursor.fetchall() != []): # if the list is not empty, the username is alrady in loginInfo
         conn.commit()
