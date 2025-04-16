@@ -39,11 +39,14 @@ def convert_to_json(list_of_tuples):
 async def load_msg(websocket, recipient, username):
     conn = sqlite3.connect('maindb.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM messageList WHERE (recipient = ? OR username = ?) AND (username = ? OR recipient = ?) ORDER BY timestamp ASC", (recipient,username,username,recipient))
+    cursor.execute("SELECT * FROM messageList WHERE ((recipient = ? OR username = ?) AND (recipient = ? OR username = ?)) OR recipient = 'everyone' ORDER BY timestamp ASC", (recipient,recipient,username,username))
     fetched = cursor.fetchall()
     fetchedmessages = "init " + convert_to_json(fetched)
+    print(fetched)
     # send the fetched messages to websocket
     await websocket.send(fetchedmessages)
+    cursor.execute("SELECT * FROM messageList");
+    print(cursor.fetchall())
     # update the people online
     broadcast(clientSet, "peopleonline " + str(len(clientSet)))
     conn.commit()
@@ -74,7 +77,7 @@ async def handler(websocket):
             else:
                 if init == False:
                     # update the message database with the new message sent
-                    update_message_db(username, message, "everyone")
+                    update_message_db(username, message, recipient)
                     broadcastobj = {"username": username, "message": message}
                     # broadcast message to all clients
                     broadcast(clientSet, json.dumps(broadcastobj))

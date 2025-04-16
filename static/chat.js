@@ -20,10 +20,14 @@ function update_message_list(message) {
 }
 
 socket.onmessage = function(event) {
-    console.log(event.data)
     if (event.data.substring(0, 5) == "init ") {
         initdata = JSON.parse(event.data.replace("init ", ""))
+        console.log(initdata)
         // loop through json data to add it to div
+        const element = document.getElementById("chatdiv");
+        for (let i = element.children.length - 1; i >= 0; i--) {
+            element.children[i].remove();
+        }
         for (let i = 0; i < initdata.length; i++) {
             let node = initdata[i]["username"] + ": " + initdata[i]["message"];
             update_message_list(node)
@@ -49,7 +53,9 @@ socket.onmessage = function(event) {
 // send an individual message to the server
 function send(){
     let authToken = document.cookie.split('=')[1]
+    console.log(recipient)
     let jsonMessage = {"authToken": authToken, "message": document.getElementById("chatsend").value, "recipient": recipient}
+    console.log(JSON.stringify(jsonMessage));
     socket.send(JSON.stringify(jsonMessage));
     document.getElementById("chatsend").value = ""
 }
@@ -62,11 +68,8 @@ function backToLogin(event) {
 }
 
 document.addEventListener("keypress", function onEvent(event) {
-    if (event.key === "Enter") {
-        let authToken = document.cookie.split('=')[1]
-    let jsonMessage = {"authToken": authToken, "message": document.getElementById("chatsend").value}
-    socket.send(JSON.stringify(jsonMessage));
-    document.getElementById("chatsend").value = ""
+    if (event.key == "Enter") {
+        send();
     }
 });
 
@@ -75,7 +78,5 @@ function load(person) {
     let authToken = document.cookie.split('=')[1]
     socket.send("loadmsg" + JSON.stringify({authToken: authToken, recipient: recipient}));
     const element = document.getElementById("chatdiv");
-    for (i = 0; i < element.children; i++) {
-        element.removeChild(element.children[i])
-    }
+
 }
