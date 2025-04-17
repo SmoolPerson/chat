@@ -61,6 +61,8 @@ def authorize(authToken):
     # find username in authtoken
     cursor.execute("SELECT * FROM authTokenList WHERE authToken = ?", (authToken,))
     fetched = cursor.fetchall()
+    conn.commit()
+    conn.close()
     if fetched == []: # if no username exists, return none
         return None
     return fetched[0][1]

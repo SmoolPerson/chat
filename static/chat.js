@@ -20,6 +20,7 @@ function update_message_list(message) {
 }
 
 socket.onmessage = function(event) {
+    console.log(event.data)
     if (event.data.substring(0, 5) == "init ") {
         initdata = JSON.parse(event.data.replace("init ", ""))
         console.log(initdata)
@@ -42,7 +43,14 @@ socket.onmessage = function(event) {
     else if (event.data != 'invalidCookieError') {
         // add individual message
         let message = JSON.parse(event.data);
-        update_message_list(message["username"] + ": " + message["message"]);
+        console.log(recipient);
+        console.log(message["intendedreceiver"]);
+        if (recipient == message["intendedreceiver"]) {
+            update_message_list(message["username"] + ": " + message["message"]);
+        }
+        else {
+            update_message_list("Received Direct Message From: " + message["username"]);
+        }
     }
     else {
         // notify user if the cookie is incorrect
@@ -53,8 +61,12 @@ socket.onmessage = function(event) {
 // send an individual message to the server
 function send(){
     let authToken = document.cookie.split('=')[1]
-    console.log(recipient)
-    let jsonMessage = {"authToken": authToken, "message": document.getElementById("chatsend").value, "recipient": recipient}
+    const chatrecip = document.getElementById("chatrecip")
+    if (recipient != chatrecip.value) {
+        recipient = chatrecip.value;
+        load();
+    }
+    let jsonMessage = {"authToken": authToken, "message": document.getElementById("chatsend").value, "recipient": recipient};
     console.log(JSON.stringify(jsonMessage));
     socket.send(JSON.stringify(jsonMessage));
     document.getElementById("chatsend").value = ""
@@ -74,9 +86,10 @@ document.addEventListener("keypress", function onEvent(event) {
 });
 
 function load(person) {
-    recipient = person;
+    if (person != undefined) {
+        recipient = person;
+    }
     let authToken = document.cookie.split('=')[1]
     socket.send("loadmsg" + JSON.stringify({authToken: authToken, recipient: recipient}));
-    const element = document.getElementById("chatdiv");
 
 }
