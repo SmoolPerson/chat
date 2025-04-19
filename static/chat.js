@@ -1,9 +1,12 @@
 socket = new WebSocket("ws://localhost:5001");
 let recipient = "everyone";
+let dmlist = []
+
 socket.addEventListener('open', function(event) {
     // this is a special message handled by the server to load initial messages
     let authToken = document.cookie.split('=')[1]
     socket.send("loadmsg" + JSON.stringify({authToken: authToken, recipient: "everyone"}));
+    socket.send("initdm" + JSON.stringify({authToken: authToken}));
 });
 
 // just add nodes to the chatdiv
@@ -23,7 +26,6 @@ socket.onmessage = function(event) {
     console.log(event.data)
     if (event.data.substring(0, 5) == "init ") {
         initdata = JSON.parse(event.data.replace("init ", ""))
-        console.log(initdata)
         // loop through json data to add it to div
         const element = document.getElementById("chatdiv");
         for (let i = element.children.length - 1; i >= 0; i--) {
@@ -34,22 +36,46 @@ socket.onmessage = function(event) {
             update_message_list(node)
         }
     }
+
+    else if (event.data.substring(0, 6) == "initdm") {
+        dmdata = JSON.parse(event.data.replace("initdm", ""))
+        console.log(dmdata);
+        const dmdiv = document.getElementById("dmdiv");
+        for (let i = 0; i < dmdata.length; i++) {
+            const button = document.createElement("button");
+            button.setAttribute("class", "dmbutton");
+            button.setAttribute("onclick", "load(this.innerHTML)")
+            button.innerHTML = dmdata[i]
+            dmdiv.appendChild(button);
+        }
+        dmlist = dmdata;
+    }
+
     // update number of people online
     else if (event.data.substring(0, 5) == "peopl") {
         value = event.data.substring(12);
         const para = document.getElementById("onlinepeople")
         para.innerHTML = "People online: " + value
     }
+
     else if (event.data != 'invalidCookieError') {
         // add individual message
         let message = JSON.parse(event.data);
-        console.log(recipient);
-        console.log(message["intendedreceiver"]);
         if (recipient == message["intendedreceiver"]) {
             update_message_list(message["username"] + ": " + message["message"]);
         }
         else {
-            update_message_list("Received Direct Message From: " + message["username"]);
+            update_message_list("Received Message From: " + message["username"]);
+        }
+        if (dmlist.indexOf(message["username"]) == -1 && message["recipient"] != "everyone" && message["username"] != ) {
+            const dmdiv = document.getElementById("dmdiv");
+            const button = document.createElement("button");
+            button.setAttribute("class", "dmbutton");
+            button.setAttribute("onclick", "load(this.innerHTML)")
+            button.innerHTML = message["username"]
+            dmdiv.appendChild(button);
+            dmlist.push(message["username"])
+            console.log(dmlist)
         }
     }
     else {
@@ -62,9 +88,9 @@ socket.onmessage = function(event) {
 function send(){
     let authToken = document.cookie.split('=')[1]
     const chatrecip = document.getElementById("chatrecip")
+    console.log(recipient);
     if (recipient != chatrecip.value) {
-        recipient = chatrecip.value;
-        load();
+        load(chatrecip.value);
     }
     let jsonMessage = {"authToken": authToken, "message": document.getElementById("chatsend").value, "recipient": recipient};
     console.log(JSON.stringify(jsonMessage));
@@ -86,10 +112,12 @@ document.addEventListener("keypress", function onEvent(event) {
 });
 
 function load(person) {
-    if (person != undefined) {
-        recipient = person;
-    }
     let authToken = document.cookie.split('=')[1]
-    socket.send("loadmsg" + JSON.stringify({authToken: authToken, recipient: recipient}));
+    const textarea = document.getElementById("chatrecip")
+    if (recipient != person) {
+        recipient = person
+        textarea.value = person;
+        socket.send("loadmsg" + JSON.stringify({authToken: authToken, recipient: recipient}));
+    }
 
 }
