@@ -1,6 +1,7 @@
 socket = new WebSocket("ws://localhost:5001");
 let recipient = "everyone";
-let dmlist = []
+let dmlist = new Set();
+dmlist.add("everyone");
 
 socket.addEventListener('open', function(event) {
     // this is a special message handled by the server to load initial messages
@@ -48,7 +49,10 @@ socket.onmessage = function(event) {
             button.innerHTML = dmdata[i]
             dmdiv.appendChild(button);
         }
-        dmlist = dmdata;
+        for (i = 0; i < dmdata.length; i++) {
+            dmlist.add(dmdata[i]);
+        }
+        displayDmlist(dmlist);
     }
 
     // update number of people online
@@ -61,21 +65,19 @@ socket.onmessage = function(event) {
     else if (event.data != 'invalidCookieError') {
         // add individual message
         let message = JSON.parse(event.data);
-        if (recipient == message["intendedreceiver"]) {
+        console.log("recipient: " + recipient);
+        console.log("intrec: " + message["username"]);
+        if (recipient == message["username"] || recipient == message["intendedreceiver"]) {
             update_message_list(message["username"] + ": " + message["message"]);
         }
         else {
             update_message_list("Received Message From: " + message["username"]);
         }
-        if (dmlist.indexOf(message["username"]) == -1 && message["recipient"] != "everyone" && message["username"] != ) {
-            const dmdiv = document.getElementById("dmdiv");
-            const button = document.createElement("button");
-            button.setAttribute("class", "dmbutton");
-            button.setAttribute("onclick", "load(this.innerHTML)")
-            button.innerHTML = message["username"]
-            dmdiv.appendChild(button);
-            dmlist.push(message["username"])
-            console.log(dmlist)
+        if (message["intendedreceiver"] != "everyone") {
+            dmlist.add(message["username"]);
+            dmlist.add(message["intendedreceiver"]);
+            console.log(message["intendedreceiver"])
+            displayDmlist(dmlist);
         }
     }
     else {
@@ -84,10 +86,26 @@ socket.onmessage = function(event) {
     }
 }; 
 
+function displayDmlist(dmdata) {
+    let dmlist = [...dmdata];
+    const element = document.getElementById("dmdiv");
+    for (let i = element.children.length - 1; i >= 0; i--) {
+        element.children[i].remove();
+    }
+    for (let j = 0; j < dmlist.length; j++) {
+        const button = document.createElement("button");
+        button.setAttribute("class", "dmbutton");
+        button.setAttribute("onclick", "load(this.innerHTML)")
+        button.innerHTML = dmlist[j];
+        element.appendChild(button);
+        console.log(j)
+    }
+}
+
 // send an individual message to the server
 function send(){
-    let authToken = document.cookie.split('=')[1]
-    const chatrecip = document.getElementById("chatrecip")
+    let authToken = document.cookie.split('=')[1];
+    const chatrecip = document.getElementById("chatrecip");
     console.log(recipient);
     if (recipient != chatrecip.value) {
         load(chatrecip.value);
@@ -112,6 +130,7 @@ document.addEventListener("keypress", function onEvent(event) {
 });
 
 function load(person) {
+    person = person.trim()
     let authToken = document.cookie.split('=')[1]
     const textarea = document.getElementById("chatrecip")
     if (recipient != person) {

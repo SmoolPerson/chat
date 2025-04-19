@@ -60,12 +60,11 @@ async def init_dm(websocket, username):
     fetched = cursor.fetchall()
     cursor.execute("SELECT DISTINCT username FROM messageList WHERE recipient = ?", (username,))
     fetched += cursor.fetchall()
-    print(username)
-    print(fetched)
-    recipient_list = []
+    recipient_set = {username}
     for item in fetched:
-        recipient_list.append(item)
-    json_obj = "initdm" + json.dumps(recipient_list)
+        recipient_set.add(item[0])
+    print(recipient_set)
+    json_obj = "initdm" + json.dumps(list(recipient_set))
     await websocket.send(json_obj)
 
 async def send_msg(username, message, recipient):
