@@ -43,6 +43,7 @@ async def load_msg(websocket, recipient, username):
     if recipient == "everyone":
         cursor.execute("SELECT * FROM messageList WHERE (recipient = 'everyone') ORDER BY timestamp ASC")
     else:
+        # check if message is exchanged between client and recipient
         cursor.execute("SELECT * FROM messageList WHERE ((username = ? AND recipient = ?) OR (recipient = ? AND username = ?)) ORDER BY timestamp ASC", (username,recipient,username,recipient))
     fetched = cursor.fetchall()
     conn.commit()
@@ -54,15 +55,20 @@ async def load_msg(websocket, recipient, username):
     broadcast(clientUsernameDict.values(), "peopleonline " + str(len(clientUsernameDict.values())))
 
 async def init_dm(websocket, username):
+    print('test')
     conn = sqlite3.connect('maindb.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT recipient FROM messageList WHERE username = ?", (username,))
+    # select the recipient based on when they were last messaged
+    cursor.execute("SELECT recipient, MAX(timestamp) AS time FROM messageList WHERE username = ? GROUP by recipient ORDER BY time DESC", (username,))
     fetched = cursor.fetchall()
-    cursor.execute("SELECT DISTINCT username FROM messageList WHERE recipient = ?", (username,))
+    cursor.execute("SELECT username, MAX(timestamp) AS time FROM messageList WHERE recipient = ? GROUP by recipient ORDER BY time DESC", (username,))
     fetched += cursor.fetchall()
-    recipient_set = {username}
+    print(fetched)
+    recipient_set = []
     for item in fetched:
-        recipient_set.add(item[0])
+        # select just the first item (recipient) from the SQL query
+        recipient_set.append(item[0])
+    recipient_set = list(dict.fromkeys(recipient_set))
     print(recipient_set)
     json_obj = "initdm" + json.dumps(list(recipient_set))
     await websocket.send(json_obj)
@@ -108,6 +114,7 @@ async def handler(websocket):
             # add username to dict pairing clients to websockets
             if username not in clientUsernameDict.keys():
                 clientUsernameDict[username] =  websocket
+                
             if purpose == "send":
                 print("sending message")
                 await send_msg(username, message, recipient)

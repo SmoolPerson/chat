@@ -1,5 +1,5 @@
 body, html {
-    background-color: lightblue; 
+    background-color: lightblue;
 }
 .header {
     font-family: 'Gill Sans', sans-serif;
@@ -15,9 +15,13 @@ body, html {
     text-align: center;
     background-color: aquamarine;
     border-style: solid;
-    width: 450px;
-    height: 275px;
+    width: 25vw;
+    height: 45vh;
     margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 #signupdiv {
@@ -44,9 +48,15 @@ body, html {
     scroll-margin-top: 200px;
 }
 
-.forminput {
+#forminput {
     font-family:'Verdana', Times, serif;
     font-size: 18px; 
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .signupinput {

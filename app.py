@@ -34,7 +34,7 @@ def generate_cookie(username):
     conn = sqlite3.connect('maindb.db')
     cursor = conn.cursor()
 
-    response = make_response(render_template('chat.html'), 200)
+    response = make_response(render_template('chat.html', username=username), 200)
     authToken = secrets.token_bytes(16).hex() # 16 random bytes are generated for the cookie
 
     response.set_cookie('authCookie', authToken)
@@ -90,7 +90,7 @@ def index():
     if username == None:
         return render_template('login.html', auth='')
     else:
-        return render_template('chat.html')
+        return render_template('chat.html', username=username)
     
 
 # handle logic for logging in
