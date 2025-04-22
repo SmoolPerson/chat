@@ -1,5 +1,7 @@
 body, html {
-    background-color: lightblue;
+    background-image: url("bg.jpeg"); 
+    background-size: 1500px, 1500px;
+    background-repeat: no-repeat; 
 }
 .header {
     font-family: 'Gill Sans', sans-serif;
@@ -13,10 +15,10 @@ body, html {
 #logindiv {
     font-family:'Verdana', Times, serif;
     text-align: center;
-    background-color: aquamarine;
+    background-color: #80ded9;
     border-style: solid;
-    width: 25vw;
-    height: 45vh;
+    width: 300px;
+    height: 250px;
     margin: auto;
     display: flex;
     flex-direction: column;
@@ -97,7 +99,7 @@ body, html {
 }
 
 .submitbutton {
-    background-color: peachpuff;
+    background-color: #00b2ca;
     border-color: blueviolet;
     width: 120px;
     height: 50px;
