@@ -2,5 +2,6 @@ bin/
 lib/
 include/
 __pycache__/
+lib64/
 pyvenv.cfg
 .DS_STORE
