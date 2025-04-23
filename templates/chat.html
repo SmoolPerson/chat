@@ -5,22 +5,24 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-        <div id="dmdiv">
+        <div id="flexcontainer">
+        <div id="dmdiv" style="flex-grow: 1;">
             <p class="normaltext">Direct Messages</p>
             <button class="dmbutton" onclick="load(this.innerHTML)">everyone</button>
         </div>
+        <div id="chatflexcontainer" style="flex-grow: 3;">
         <h1 class="header">Time to start chatting!</h1>
-        <p class="normaltext"><strong id="hello"> Hello, {{username}}</strong></p>
-        <p class="normaltext"><strong id="onlinepeople"></strong></p>
+        <strong id="hello" class="normaltext"> Hello, {{username}}</strong>
+        <strong class="normaltext" id="onlinepeople"></strong><br>
         <div id="chatdiv">
         </div>
-        <div class="normaltext">
             <p class="normaltext">Enter message here:</p>
 	    <textarea id="chatsend" cols="30" rows="1"></textarea><br><br>
         <p class="normaltext">Enter recipient here:</p>
-        <textarea id="chatrecip" cols="30" rows="1">everyone</textarea><br><br>
+        <textarea id="chatrecip" cols="30" rows="1" style="display: inline;">everyone</textarea><br><br>
             <button class="submitbutton" onclick="send()" class="submitbutton"> Send </button><br>
              <a class="normaltext" href="./" onclick="backToLogin(event)"> Log in again </a>
+        </div>
         </div>
         <script src="./static/chat.js"></script>
 </body>
