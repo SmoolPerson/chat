@@ -1,6 +1,7 @@
 socket = new WebSocket("ws://localhost:5001");
 let currentRecipient = "everyone";
 let dmlist = new Set();
+const globalName = document.getElementById("hello").innerHTML.replace(" Hello, ", "");
 dmlist.add("everyone");
 
 socket.addEventListener('open', function(event) {
@@ -11,16 +12,28 @@ socket.addEventListener('open', function(event) {
 });
 
 // just add nodes to the chatdiv
-function update_message_list(message) {
-    const para = document.createElement("p")
-    const node = document.createTextNode(message)
-    para.appendChild(node);
-    const element = document.getElementById("chatdiv");
-    element.appendChild(para);
-    if (element.children.length > 50) {
-        element.children[0].remove();
+function update_message_list(message, sender, timestamp) {
+    const para = document.createElement("p");
+    const msg = document.createElement("span");
+    const chatdiv = document.getElementById("chatdiv");
+    let date = new Date(Math.round(timestamp * 1000));
+    let time = date.toLocaleString("en-US", {month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'});
+    const node = document.createTextNode(time + ": " + message);
+    msg.appendChild(node);
+    if (sender == globalName) {
+        para.setAttribute("style", "display: flex; flex-direction: row-reverse;")
+        msg.setAttribute("style", "background-color: lightblue; margin: 10px; padding: 5px; border-radius: 5px; border-style: solid; border-width: 2px;");
     }
-    element.scrollTop = element.scrollHeight;
+    else {
+        para.setAttribute("style", "display: flex; flex-direction: row;")
+        msg.setAttribute("style", "background-color: gray; margin: 10px; padding: 5px; border-radius: 5px; border-style: solid; border-width: 2px;");
+    }
+    para.appendChild(msg);
+    chatdiv.appendChild(para);
+    if (chatdiv.children.length > 50) {
+        chatdiv.children[0].remove();
+    }
+    chatdiv.scrollTop = chatdiv.scrollHeight;
 }
 
 socket.onmessage = function(event) {
@@ -34,7 +47,7 @@ socket.onmessage = function(event) {
         }
         for (let i = 0; i < initdata.length; i++) {
             let node = initdata[i]["username"] + ": " + initdata[i]["message"];
-            update_message_list(node)
+            update_message_list(node, initdata[i]["username"], initdata[i]["timestamp"])
         }
     }
 
@@ -61,20 +74,19 @@ socket.onmessage = function(event) {
         // if the recipient of the current conversation is either the username or receiver, then the user is in current conversation
         if (currentRecipient == message["username"] || currentRecipient == message["intendedreceiver"]) {
             // display message since in current conversation
-            update_message_list(message["username"] + ": " + message["message"]);
+            update_message_list(message["username"] + ": " + message["message"], message["username"], message["timestamp"]);
         }
         else {
             // display notif message since user is in different conversation
-            update_message_list("Received Message From: " + message["username"]);
+            update_message_list("Received Message From: " + message["username"], message["username"], message["timestamp"]);
         }
         // we are going to add the message to the set of direct messages
         if (message["intendedreceiver"] != "everyone") {
-            const name = document.getElementById("hello").innerHTML.replace(" Hello, ", "");
             // don't add the user's name to their dms, otherwise they would be sending a message to themself
-            if (message["username"] != name) {
+            if (message["username"] != globalName) {
                 dmlist.add(message["username"]);
             }
-            if (message["intendedreceiver"] != name) {
+            if (message["intendedreceiver"] != globalName) {
                 dmlist.add(message["intendedreceiver"]);
             }
             console.log(name)

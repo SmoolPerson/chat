@@ -6,7 +6,7 @@ import time
 clientUsernameDict = {}
 
 # self explanatory name
-def update_message_db(username, message, recipient):
+def update_message_db(username, message, recipient, timestamp):
     # insert all info into db
     conn = sqlite3.connect('maindb.db')
     cursor = conn.cursor()
@@ -32,7 +32,7 @@ def authorize(authToken):
 def convert_to_json(list_of_tuples):
     output_list = []
     for item in list_of_tuples:
-        output_list.append({"username": item[1], "message":  item[3], "recipient": item[2]})
+        output_list.append({"username": item[1], "message":  item[3], "recipient": item[2], "timestamp": item[0]})
     output_string = json.dumps(output_list)
     return output_string
 
@@ -68,15 +68,16 @@ async def init_dm(websocket, username):
     for item in fetched:
         # select just the first item (recipient) from the SQL query
         recipient_set.append(item[0])
-    recipient_set = list(dict.fromkeys(recipient_set))
+    recipient_set = recipient_set
     print(recipient_set)
     json_obj = "initdm" + json.dumps(list(recipient_set))
     await websocket.send(json_obj)
 
 async def send_msg(username, message, recipient):
+    timestamp = time.time()
     # update the message database with the new message sent
-    update_message_db(username, message, recipient)
-    broadcastobj = {"username": username, "message": message, "intendedreceiver": recipient}
+    update_message_db(username, message, recipient, timestamp)
+    broadcastobj = {"username": username, "message": message, "intendedreceiver": recipient, "timestamp": timestamp}
     # broadcast message to all clients if recipient is everyone
     if recipient == 'everyone':
         broadcast(clientUsernameDict.values(), json.dumps(broadcastobj))

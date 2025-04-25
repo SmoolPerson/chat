@@ -1,5 +1,5 @@
 body, html {
-    background: rgb(255, 255, 255);
+    background: rgb(206, 235, 240);
     background-size: 175% 175%;
     background-repeat: repeat; 
 }
@@ -15,7 +15,7 @@ body, html {
 .logindiv {
     font-family:'Verdana', Times, serif;
     text-align: center;
-    background-color: #98bef0;
+    background-color: #c4d8f3;
     border-style: solid;
     width: 300px;
     height: 250px;
@@ -62,9 +62,7 @@ body, html {
 
 #chatsend {
     font-family:'Verdana', Times, serif;
-    border-style: solid;
-    border-width: 3px;
-    border-color: #287067;
+    border-radius: 3px;
 }
 
 #dmdiv {
