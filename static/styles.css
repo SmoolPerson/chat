@@ -1,5 +1,5 @@
 body, html {
-    background: linear-gradient(rgb(157, 207, 242), rgb(42, 147, 234)); 
+    background: rgb(255, 255, 255);
     background-size: 175% 175%;
     background-repeat: repeat; 
 }
@@ -65,7 +65,6 @@ body, html {
     border-style: solid;
     border-width: 3px;
     border-color: #287067;
-    text-align: center;
 }
 
 #dmdiv {
