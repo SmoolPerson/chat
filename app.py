@@ -92,6 +92,10 @@ def index():
     else:
         return render_template('chat.html', username=username)
     
+@app.route("/profile")
+def profile():
+    return render_template('profile.html', auth='')
+    
 
 # handle logic for logging in
 @app.route("/chat", methods=["POST"])

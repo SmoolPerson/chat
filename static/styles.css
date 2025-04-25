@@ -1,7 +1,6 @@
 body, html {
     background: rgb(206, 235, 240);
-    background-size: 175% 175%;
-    background-repeat: repeat; 
+    height: 100%;
 }
 .header {
     font-family: 'Gill Sans', sans-serif;

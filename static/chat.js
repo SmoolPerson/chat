@@ -2,6 +2,7 @@ socket = new WebSocket("ws://localhost:5001");
 let currentRecipient = "everyone";
 let dmlist = new Set();
 const globalName = document.getElementById("hello").innerHTML.replace(" Hello, ", "");
+let previousTimestamp = 0;
 dmlist.add("everyone");
 
 socket.addEventListener('open', function(event) {
@@ -16,24 +17,37 @@ function update_message_list(message, sender, timestamp) {
     const para = document.createElement("p");
     const msg = document.createElement("span");
     const chatdiv = document.getElementById("chatdiv");
+    const node = document.createTextNode(message);
     let date = new Date(Math.round(timestamp * 1000));
-    let time = date.toLocaleString("en-US", {month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'});
-    const node = document.createTextNode(time + ": " + message);
-    msg.appendChild(node);
-    if (sender == globalName) {
-        para.setAttribute("style", "display: flex; flex-direction: row-reverse;")
-        msg.setAttribute("style", "background-color: lightblue; margin: 10px; padding: 5px; border-radius: 5px; border-style: solid; border-width: 2px;");
+    let time;
+    if (timestamp * 1000 - previousTimestamp * 1000 > 86400000 ) {
+    time = " " + date.toLocaleString("en-US", {month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'}) + " ";
     }
     else {
-        para.setAttribute("style", "display: flex; flex-direction: row;")
-        msg.setAttribute("style", "background-color: gray; margin: 10px; padding: 5px; border-radius: 5px; border-style: solid; border-width: 2px;");
+        time = " " + date.toLocaleString("en-US", {hour: 'numeric', minute: '2-digit'}) + " ";
+    }
+    const timeSpan = document.createElement("span");
+    const timeText = document.createTextNode(time); 
+    msg.appendChild(node);
+    timeSpan.append(timeText);
+    if (sender == globalName) {
+        para.setAttribute("style", "display: flex; flex-direction: row-reverse; align-items: center;")
+        msg.setAttribute("style", "background-color: lightblue; margin: 3px; padding: 5px; border-radius: 5px; border-style: solid; border-width: 1px;");
+    }
+    else {
+        para.setAttribute("style", "display: flex; flex-direction: row; align-items: center;");
+        msg.setAttribute("style", "background-color:rgb(164, 164, 164); margin: 2px; padding: 5px; border-radius: 5px; border-style: solid; border-width: 1px;");
     }
     para.appendChild(msg);
+    if (timestamp * 1000 - previousTimestamp * 1000 > 300000) {
+        para.appendChild(timeSpan);
+    }
     chatdiv.appendChild(para);
     if (chatdiv.children.length > 50) {
         chatdiv.children[0].remove();
     }
     chatdiv.scrollTop = chatdiv.scrollHeight;
+    previousTimestamp = timestamp
 }
 
 socket.onmessage = function(event) {
